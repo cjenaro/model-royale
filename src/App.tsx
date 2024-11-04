@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Completion from "./components/completion";
 import { CompletionProps, Model, MODELS } from "./lib/models";
+import { Link } from "react-router-dom";
 
 const schema = z.object({
   openAiKey: z.string().optional(),
@@ -252,3 +253,12 @@ function App() {
 }
 
 export default App;
+
+export function AppErrorElement() {
+  return (
+    <div className="container mx-auto pt-36 flex flex-col items-center justify-start gap-10">
+      <h2>There was an unexpected error :(</h2>
+      <Link to="/app">&larr; go back</Link>
+    </div>
+  );
+}

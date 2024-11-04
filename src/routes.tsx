@@ -1,4 +1,4 @@
-import App from "./App";
+import App, { AppErrorElement } from "./App";
 import Layout from "./components/layout";
 import Home from "./Home";
 import NotFound from "./NotFound";
@@ -9,7 +9,7 @@ export default [
     element: <Layout />,
     children: [
       { path: "/", element: <Home /> },
-      { path: "app", element: <App /> },
+      { path: "app", element: <App />, errorElement: <AppErrorElement /> },
       { path: "*", element: <NotFound /> },
     ],
   },
