@@ -21,182 +21,89 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Completion from "./components/completion";
+import { CompletionProps, Model, MODELS } from "./lib/models";
 
 const schema = z.object({
-  key: z.string(),
+  openAiKey: z.string().optional(),
+  googleKey: z.string().optional(),
   models: z.array(z.string()),
   prompt: z.string(),
 });
 
-const MODELS = [
-  {
-    value: "gpt-4-turbo",
-    label: "GPT-4 Turbo",
-    company: "openai",
+function isCompanySelected(
+  company: string,
+  models: {
+    [key: string]: Model & { checked: boolean };
   },
-  {
-    value: "gpt-4-turbo-2024-04-09",
-    label: "GPT-4 Turbo (2024-04-09)",
-    company: "openai",
-  },
-  {
-    value: "gpt-4o",
-    label: "GPT-4o",
-    company: "openai",
-  },
-  {
-    value: "tts-1",
-    label: "Text to Speech (TTS-1)",
-    company: "openai",
-  },
-  {
-    value: "tts-1-1106",
-    label: "Text to Speech (TTS-1-1106)",
-    company: "openai",
-  },
-  {
-    value: "chatgpt-4o-latest",
-    label: "ChatGPT-4o Latest",
-    company: "openai",
-  },
-  {
-    value: "gpt-4-turbo-preview",
-    label: "GPT-4 Turbo Preview",
-    company: "openai",
-  },
-  {
-    value: "gpt-3.5-turbo-instruct",
-    label: "GPT-3.5 Turbo Instruct",
-    company: "openai",
-  },
-  {
-    value: "gpt-4-0125-preview",
-    label: "GPT-4 0125 Preview",
-    company: "openai",
-  },
-  {
-    value: "gpt-3.5-turbo-0125",
-    label: "GPT-3.5 Turbo (0125)",
-    company: "openai",
-  },
-  {
-    value: "gpt-3.5-turbo",
-    label: "GPT-3.5 Turbo",
-    company: "openai",
-  },
-  {
-    value: "gpt-4o-realtime-preview-2024-10-01",
-    label: "GPT-4o Realtime Preview (2024-10-01)",
-    company: "openai",
-  },
-  {
-    value: "gpt-4o-realtime-preview",
-    label: "GPT-4o Realtime Preview",
-    company: "openai",
-  },
-  {
-    value: "gpt-4o-2024-08-06",
-    label: "GPT-4o (2024-08-06)",
-    company: "openai",
-  },
-  {
-    value: "gpt-4o-mini",
-    label: "GPT-4o Mini",
-    company: "openai",
-  },
-  {
-    value: "gpt-4o-2024-05-13",
-    label: "GPT-4o (2024-05-13)",
-    company: "openai",
-  },
-  {
-    value: "gpt-4o-mini-2024-07-18",
-    label: "GPT-4o Mini (2024-07-18)",
-    company: "openai",
-  },
-  {
-    value: "gpt-4-1106-preview",
-    label: "GPT-4 1106 Preview",
-    company: "openai",
-  },
-  {
-    value: "text-embedding-ada-002",
-    label: "Text Embedding Ada 002",
-    company: "openai",
-  },
-  {
-    value: "gpt-3.5-turbo-16k",
-    label: "GPT-3.5 Turbo 16k",
-    company: "openai",
-  },
-  {
-    value: "text-embedding-3-small",
-    label: "Text Embedding 3 Small",
-    company: "openai",
-  },
-  {
-    value: "text-embedding-3-large",
-    label: "Text Embedding 3 Large",
-    company: "openai",
-  },
-  {
-    value: "whisper-1",
-    label: "Whisper 1",
-    company: "openai",
-  },
-  {
-    value: "gpt-4-0613",
-    label: "GPT-4 (0613)",
-    company: "openai",
-  },
-  {
-    value: "gpt-4",
-    label: "GPT-4",
-    company: "openai",
-  },
-  {
-    value: "gpt-3.5-turbo-instruct-0914",
-    label: "GPT-3.5 Turbo Instruct (0914)",
-    company: "openai",
-  },
-] as const;
+) {
+  return Object.keys(models).some(
+    (key) => company === models[key].company && models[key].checked,
+  );
+}
 
 function App() {
-  const [completions, setCompletions] = useState<
-    {
-      apiKey: string;
-      prompt: string;
-      model: string;
-    }[]
-  >([]);
+  const [completions, setCompletions] = useState<CompletionProps[]>([]);
   const [checkedModels, setCheckedModels] = useState<{
-    [key: string]: boolean;
-  }>(MODELS.reduce((acc, model) => ({ ...acc, [model.value]: false }), {}));
+    [key: string]: Model & { checked: boolean };
+  }>(
+    MODELS.reduce(
+      (acc, model) => ({ ...acc, [model.value]: { ...model, checked: false } }),
+      {},
+    ),
+  );
+  const isOpenAIChecked = isCompanySelected("openai", checkedModels);
+  const isGoogleChecked = isCompanySelected("google", checkedModels);
   function checked(model: string) {
-    return checkedModels[model];
+    return checkedModels[model].checked;
   }
 
   function setChecked(model: string) {
     return () => {
-      setCheckedModels((old) => ({ ...old, [model]: !old[model] }));
+      setCheckedModels((old) => ({
+        ...old,
+        [model]: { ...old[model], checked: !old[model].checked },
+      }));
     };
   }
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: { key: "", models: [], prompt: "" },
+    defaultValues: { openAiKey: "", models: [], prompt: "" },
   });
 
   const selectedModels = Object.keys(checkedModels).filter(
-    (model) => checkedModels[model],
+    (model) => checkedModels[model].checked,
   );
 
+  console.log(form.formState.errors);
+
   async function onSubmit(values: z.infer<typeof schema>) {
-    if (values.key && values.prompt) {
+    if (isOpenAIChecked && !values.openAiKey) {
+      form.setError(
+        "openAiKey",
+        { message: "OpenAI key is required when using OpenAI models" },
+        { shouldFocus: true },
+      );
+      return;
+    }
+
+    if (isGoogleChecked && !values.googleKey) {
+      form.setError(
+        "googleKey",
+        { message: "Google key is required when using Google models" },
+        { shouldFocus: true },
+      );
+      return;
+    }
+
+    setCompletions([]);
+
+    if (values.prompt) {
       const comp = selectedModels.map((model) => ({
         ...values,
         model,
-        apiKey: values.key,
+        openaiKey: values.openAiKey,
+        googleKey: values.googleKey,
       }));
       setCompletions(comp);
     }
@@ -244,22 +151,42 @@ function App() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="key"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>OpenAI Key</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormDescription>
-                  This key is not stored in any way
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {isOpenAIChecked ? (
+            <FormField
+              control={form.control}
+              name="openAiKey"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>OpenAI Key</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    This key is not stored in any way
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
+          {isGoogleChecked ? (
+            <FormField
+              control={form.control}
+              name="googleKey"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Google Key</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    This key is not stored in any way
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
           <FormField
             control={form.control}
             name="prompt"
@@ -285,7 +212,10 @@ function App() {
         <div className="overflow-x-scroll container">
           <div className="gap-4 flex">
             {completions.map((comp) => (
-              <Completion key={comp.model} {...comp} />
+              <Completion
+                key={comp.model + form.formState.submitCount}
+                {...comp}
+              />
             ))}
           </div>
         </div>

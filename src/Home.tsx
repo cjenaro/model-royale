@@ -23,9 +23,9 @@ export default function Home() {
         className="rounded-2xl shadow-lg max-w-full"
         width="560"
         height="315"
-        src="https://www.youtube.com/embed/WQIYiGQ8qUk?si=GIrmQ_DK74ybLjL6"
+        src="https://www.youtube.com/embed/MKyyssHSP6A?si=dX8vzi-Zc7MRJsQj"
         title="YouTube video player"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allow="accelerometer; autoplay; fullscreen; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         referrerPolicy="strict-origin-when-cross-origin"
       ></iframe>
     </div>

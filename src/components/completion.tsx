@@ -1,4 +1,8 @@
+import { CompletionProps, isGoogleModel, isOpenAIModel } from "@/lib/models";
 import { useMutation } from "@tanstack/react-query";
+import { CoreTool, generateText, GenerateTextResult } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
 import { useEffect } from "react";
 import Markdown from "react-markdown";
 
@@ -33,34 +37,37 @@ type ChatGPTResponse = {
 
 export default function Completion({
   model,
-  apiKey,
+  googleKey,
+  openaiKey,
   prompt,
-}: {
-  model: string;
-  apiKey: string;
-  prompt: string;
-}) {
+}: CompletionProps) {
   const { mutateAsync, data, error, isPending, submittedAt } = useMutation<
-    ChatGPTResponse,
+    GenerateTextResult<Record<string, CoreTool>>,
     Error
   >({
     mutationFn: async () => {
-      const requestOptions = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      };
+      if (isGoogleModel(model)) {
+        const google = createGoogleGenerativeAI({
+          apiKey: googleKey,
+        });
 
-      return fetch(
-        "https://api.openai.com/v1/chat/completions",
-        requestOptions,
-      ).then((response) => response.json());
+        return generateText({
+          model: google(model),
+          prompt,
+        });
+      }
+
+      if (isOpenAIModel(model)) {
+        const openai = createOpenAI({
+          apiKey: openaiKey,
+        });
+        return generateText({
+          model: openai(model),
+          prompt,
+        });
+      }
+
+      throw new Error("Should never reach");
     },
   });
 
@@ -86,11 +93,11 @@ export default function Completion({
 
   return (
     <div className="w-64 md:w-80 lg:w-96 rounded-lg p-6 bg-amber-500/50 prose-invert shrink-0">
-      <h3 className="text-xl mb-2">{data?.model}</h3>
-      <Markdown>{data?.choices[0].message.content}</Markdown>
+      <h3 className="text-xl mb-2">{data?.response.modelId}</h3>
+      <Markdown>{data?.text}</Markdown>
 
       <p className="font-bold mt-2">
-        This model costed you: {data?.usage.total_tokens} tokens and took{" "}
+        This model costed you: {data?.usage.totalTokens} tokens and took{" "}
         {((Date.now() - submittedAt) / 1000).toFixed(2)} seconds
       </p>
     </div>
