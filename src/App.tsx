@@ -26,12 +26,13 @@ import { CompletionProps, Model, MODELS } from "./lib/models";
 const schema = z.object({
   openAiKey: z.string().optional(),
   googleKey: z.string().optional(),
+  anthropicKey: z.string().optional(),
   models: z.array(z.string()),
   prompt: z.string(),
 });
 
 function isCompanySelected(
-  company: string,
+  company: Model["company"],
   models: {
     [key: string]: Model & { checked: boolean };
   },
@@ -53,6 +54,8 @@ function App() {
   );
   const isOpenAIChecked = isCompanySelected("openai", checkedModels);
   const isGoogleChecked = isCompanySelected("google", checkedModels);
+  const isAnthropicChecked = isCompanySelected("anthropic", checkedModels);
+
   function checked(model: string) {
     return checkedModels[model].checked;
   }
@@ -75,8 +78,6 @@ function App() {
     (model) => checkedModels[model].checked,
   );
 
-  console.log(form.formState.errors);
-
   async function onSubmit(values: z.infer<typeof schema>) {
     if (isOpenAIChecked && !values.openAiKey) {
       form.setError(
@@ -96,7 +97,14 @@ function App() {
       return;
     }
 
-    setCompletions([]);
+    if (isAnthropicChecked && !values.anthropicKey) {
+      form.setError(
+        "anthropicKey",
+        { message: "Anthropic key is required when using Anthropic models" },
+        { shouldFocus: true },
+      );
+      return;
+    }
 
     if (values.prompt) {
       const comp = selectedModels.map((model) => ({
@@ -104,6 +112,7 @@ function App() {
         model,
         openaiKey: values.openAiKey,
         googleKey: values.googleKey,
+        anthropicKey: values.anthropicKey,
       }));
       setCompletions(comp);
     }
@@ -159,7 +168,7 @@ function App() {
                 <FormItem>
                   <FormLabel>OpenAI Key</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} type="password" />
                   </FormControl>
                   <FormDescription>
                     This key is not stored in any way
@@ -177,7 +186,25 @@ function App() {
                 <FormItem>
                   <FormLabel>Google Key</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} type="password" />
+                  </FormControl>
+                  <FormDescription>
+                    This key is not stored in any way
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
+          {isAnthropicChecked ? (
+            <FormField
+              control={form.control}
+              name="anthropicKey"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Anthropic Key</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="password" />
                   </FormControl>
                   <FormDescription>
                     This key is not stored in any way
@@ -210,7 +237,7 @@ function App() {
 
       {completions.length > 0 ? (
         <div className="overflow-x-scroll container">
-          <div className="gap-4 flex">
+          <div className="gap-4 flex mb-4">
             {completions.map((comp) => (
               <Completion
                 key={comp.model + form.formState.submitCount}

@@ -119,12 +119,47 @@ export const MODELS = [
     label: "Gemini 1.0 Pro",
     company: "google",
   },
+  {
+    value: "claude-3-5-sonnet-latest",
+    label: "Claude 3.5 Sonnet Latest",
+    company: "anthropic",
+  },
+  {
+    value: "claude-3-5-sonnet-20241022",
+    label: "Claude 3.5 Sonnet 20241022",
+    company: "anthropic",
+  },
+  {
+    value: "claude-3-5-sonnet-20240620",
+    label: "Claude 3.5 Sonnet 20240620",
+    company: "anthropic",
+  },
+  {
+    value: "claude-3-opus-latest",
+    label: "Claude 3 Opus Latest",
+    company: "anthropic",
+  },
+  {
+    value: "claude-3-opus-20240229",
+    label: "Claude 3 Opus 20240229",
+    company: "anthropic",
+  },
+  {
+    value: "claude-3-sonnet-20240229",
+    label: "Claude 3 Sonnet 20240229",
+    company: "anthropic",
+  },
+  {
+    value: "claude-3-haiku-20240307",
+    label: "Claude 3 Haiku 20240307",
+    company: "anthropic",
+  },
 ] as const;
 
 export type Model = {
   value: string;
   label: string;
-  company: "openai" | "google";
+  company: "openai" | "google" | "anthropic";
 };
 
 export type CompletionProps = {
@@ -140,4 +175,8 @@ export function isGoogleModel(model: string) {
 
 export function isOpenAIModel(model: string) {
   return MODELS.find((m) => m.value === model)?.company === "openai";
+}
+
+export function isAnthropicModel(model: string) {
+  return MODELS.find((m) => m.value === model)?.company === "anthropic";
 }

@@ -1,44 +1,22 @@
-import { CompletionProps, isGoogleModel, isOpenAIModel } from "@/lib/models";
+import {
+  CompletionProps,
+  isAnthropicModel,
+  isGoogleModel,
+  isOpenAIModel,
+} from "@/lib/models";
 import { useMutation } from "@tanstack/react-query";
 import { CoreTool, generateText, GenerateTextResult } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { useEffect } from "react";
 import Markdown from "react-markdown";
-
-type ChatGPTResponse = {
-  id: string;
-  object: "chat.completion";
-  created: number;
-  model: string;
-  choices: Array<{
-    index: number;
-    message: {
-      role: string;
-      content: string;
-      refusal: null;
-    };
-    logprobs: null;
-    finish_reason: string;
-  }>;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-    prompt_tokens_details: {
-      cached_tokens: number;
-    };
-    completion_tokens_details: {
-      reasoning_tokens: number;
-    };
-  };
-  system_fingerprint: null;
-};
+import { createAnthropic } from "@ai-sdk/anthropic";
 
 export default function Completion({
   model,
   googleKey,
   openaiKey,
+  anthropicKey,
   prompt,
 }: CompletionProps) {
   const { mutateAsync, data, error, isPending, submittedAt } = useMutation<
@@ -63,6 +41,20 @@ export default function Completion({
         });
         return generateText({
           model: openai(model),
+          prompt,
+        });
+      }
+
+      if (isAnthropicModel(model)) {
+        const anthropic = createAnthropic({
+          apiKey: anthropicKey,
+          headers: {
+            "anthropic-dangerous-direct-browser-access": "true",
+          },
+        });
+
+        return generateText({
+          model: anthropic(model),
           prompt,
         });
       }
