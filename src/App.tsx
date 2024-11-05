@@ -142,7 +142,7 @@ function App() {
                         ? selectedModels.length + " models selected"
                         : "Select a model"}
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
+                    <DropdownMenuContent className="overflow-y-scroll max-h-96">
                       {MODELS.map((model) => (
                         <DropdownMenuCheckboxItem
                           key={model.value}

@@ -166,6 +166,7 @@ export type CompletionProps = {
   model: string;
   googleKey?: string;
   openaiKey?: string;
+  anthropicKey?: string;
   prompt: string;
 };
 

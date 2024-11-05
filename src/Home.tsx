@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <div className="p-8 pt-32 flex flex-col xl:flex-row gap-8 justify-between container mx-auto items-center">
       <div className="flex flex-col gap-8 items-center xl:items-start">
-        <h1 className="font-title -rotate-3 text-7xl md:text-9xl flex gap-4 flex-col w-fit bg-amber-700 py-4 px-6">
+        <h1 className="font-title -rotate-3 text-4xl sm:text-7xl md:text-9xl flex gap-4 flex-col w-fit bg-amber-700 py-4 px-6">
           <span>Model</span>
           <span className="ml-10">Royale</span>
         </h1>
